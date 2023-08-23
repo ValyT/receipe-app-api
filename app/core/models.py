@@ -2,7 +2,7 @@
 Database models
 """
 from django.db import models
-from django.contrib.auth.modles import (
+from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
     PermissionsMixin,
@@ -11,11 +11,11 @@ from django.contrib.auth.modles import (
 
 class UserManager(BaseUserManager):
     """Manager for users"""
-    def create_user(self, email, password=None, **extra_field):
+    def create_user(self, email, password=None, **extra_fields):
         """Creates, save, return new user"""
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
-        user.save(using=self_db)
+        user.save(using=self._db)
 
         return user
 
