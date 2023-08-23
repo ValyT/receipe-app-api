@@ -5,6 +5,6 @@ from user import views
 
 app_name= 'user'
 
-urlpatter=[
+urlpatterns=[
     path('create/', views.CreateUserView.as_view(), name='create'),
 ]
