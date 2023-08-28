@@ -5,10 +5,11 @@ from decimal import Decimal
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 
 from rest_framework.test import APIClient
 from rest_framework import status
-from django.urls import reverse
+
 
 from core.models import Recipe
 
@@ -20,7 +21,7 @@ RECIPES_URL = reverse('recipe:recipe-list')
 
 def create_recipe(user, **params):
     """Create and return sample recipe"""
-    defaults={
+    defaults = {
         'title': 'Sample recipe title',
         'time_minutes': 33,
         'price': Decimal('6.66'),
@@ -31,6 +32,7 @@ def create_recipe(user, **params):
 
     recipe = Recipe.objects.create(user=user, **defaults)
     return recipe
+
 
 class PublicRecipeApiTests(TestCase):
     """Unauthenticated recipe api request tests"""
@@ -72,7 +74,7 @@ class PrivateRecipeApiTests(TestCase):
 
     def test_recepies_seen_limited_to_user(self):
         """Test of recepies limited by user"""
-        other_user=get_user_model().objects.create_user(
+        other_user = get_user_model().objects.create_user(
             email='other@example.com',
             password='testotherpass123',
             name='other Name',
