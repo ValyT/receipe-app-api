@@ -42,6 +42,11 @@ def create_recipe(user, **params):
     return recipe
 
 
+def create_user(**params):
+    """Make a user"""
+    return get_user_model().objects.create_user(**params)
+
+
 class PublicRecipeApiTests(TestCase):
     """Unauthenticated recipe api request tests"""
 
@@ -59,7 +64,7 @@ class PrivateRecipeApiTests(TestCase):
     """Test recipe API requests that require authentication"""
 
     def setUp(self):
-        self.user = get_user_model().objects.create_user(
+        self.user = create_user(
             email='test@example.com',
             password='testpass123',
             name='Test Name',
@@ -82,7 +87,7 @@ class PrivateRecipeApiTests(TestCase):
 
     def test_recepies_seen_limited_to_user(self):
         """Test of recepies limited by user"""
-        other_user = get_user_model().objects.create_user(
+        other_user = create_user(
             email='other@example.com',
             password='testotherpass123',
             name='other Name',
@@ -123,3 +128,79 @@ class PrivateRecipeApiTests(TestCase):
         for k, v in payload.items():
             self.assertEqual(getattr(recipe, k), v)
         self.assertEqual(recipe.user, self.user)
+
+    def test_partial_recepie_update(self):
+        """Partial update test"""
+        original_link = 'http://example.com/recipe.pdf'
+        recipe = create_recipe(
+            user=self.user,
+            title='Sample title',
+            link=original_link,
+        )
+        payload = {'title': 'New recepie title'}
+        url = detail_url(recipe.id)
+        res = self.client.patch(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        recipe.refresh_from_db()
+        self.assertEqual(recipe.title, payload['title'])
+        self.assertEqual(recipe.link, original_link)
+        self.assertEqual(recipe.user, self.user)
+
+    def test_full_update(self):
+        """Testing full update of receipe"""
+        recipe = create_recipe(
+            user=self.user,
+            title='Sample title',
+            link='http://example.com/recipe.pdf',
+            description='Sample description'
+        )
+        payload = {
+            'title': 'New recepe title',
+            'link': 'http://example.com/recipe.pdf',
+            'description': 'Sample description',
+            'time_minutes': 69,
+            'price': Decimal('9.99'),
+        }
+        url = detail_url(recipe.id)
+        res = self.client.put(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        recipe.refresh_from_db()
+
+        for k, v in payload.items():
+            self.assertEqual(getattr(recipe, k), v)
+        self.assertEqual(recipe.user, self.user)
+
+    def test_update_receipe_user_error(self):
+        """Testing changing receipe user throws error """
+        new_user = create_user(email='usr@example.com', password='test123')
+        recipe = create_recipe(user=self.user)
+
+        payload = {'user': new_user.id}
+        url = detail_url(recipe.id)
+        self.client.patch(url, payload)
+
+        recipe.refresh_from_db()
+        self.assertEqual(recipe.user, self.user)
+
+    def test_del_receipe(self):
+        """Testing deleting a receipe """
+        recipe = create_recipe(user=self.user)
+
+        url = detail_url(recipe.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Recipe.objects.filter(id=recipe.id).exists())
+
+    def test_delete_other_user_receipe_error(self):
+        """Testing cant del another users receipe"""
+        new_user = create_user(email='usr@example.com', password='test123')
+        recipe = create_recipe(user=new_user)
+
+        url = detail_url(recipe.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertTrue(Recipe.objects.filter(id=recipe.id).exists())
