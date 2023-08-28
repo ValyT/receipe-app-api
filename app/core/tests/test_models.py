@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 
 from core import models
 
+
 class ModelTests(TestCase):
     """Test models"""
     def test_create_user_with_email_successful(self):
@@ -59,8 +60,8 @@ class ModelTests(TestCase):
             user=user,
             title='Sample recipe name',
             time_minutes=5,
-            price=Decimal('5,50'),
-            description= 'Sample recipe description',
+            price=Decimal('5.50'),
+            description='Sample recipe description',
         )
 
         self.assertEqual(str(recipe), recipe.title)
