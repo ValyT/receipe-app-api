@@ -323,8 +323,8 @@ class PrivateRecipeApiTests(TestCase):
             self.assertTrue(exists)
 
     def test_create_receipe_w_existing_ingredients(self):
-        """Test creating a receipe with existing ingredients (no replication)"""
-        ingredient_old = Ingredient.objects.create(user=self.user, name='Lemon')
+        """Test creating a receipe with existing ingredients(no replication)"""
+        ingredient_og = Ingredient.objects.create(user=self.user, name='Lemon')
         payload = {
             'title': 'Vietnamese Soup',
             'link': 'http://example.com/recipe.pdf',
@@ -341,7 +341,7 @@ class PrivateRecipeApiTests(TestCase):
         self.assertEqual(recipes.count(), 1)
         recipe = recipes[0]
         self.assertEqual(recipe.ingredients.count(), 2)
-        self.assertIn(ingredient_old, recipe.ingredients.all())
+        self.assertIn(ingredient_og, recipe.ingredients.all())
         for ingredient in payload['ingredients']:
             exists = recipe.ingredients.filter(
                 name=ingredient['name'],
