@@ -40,7 +40,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def _params_to_int(self, qs):
         """Convert list of strings to int"""
-        return[int(str_id) for str_id in qs.split(',')]
+        return [int(str_id) for str_id in qs.split(',')]
 
     def get_queryset(self):
         """Retrieve auth user recipes"""
@@ -65,7 +65,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return serializers.RecipeSerializer
 
-        if self.action == 'upload_image':
+        elif self.action == 'upload_image':
             return serializers.RecipeImageSerializer
 
         return self.serializer_class
